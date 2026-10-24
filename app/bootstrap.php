@@ -14,16 +14,24 @@ spl_autoload_register(function (string $class): void {
 });
 
 if (session_status() !== PHP_SESSION_ACTIVE) {
-    $secure = filter_var(getenv('SESSION_SECURE_COOKIE') ?: 'false', FILTER_VALIDATE_BOOLEAN);
+    $https = (!empty($_SERVER['HTTPS']) && strtolower((string) $_SERVER['HTTPS']) !== 'off')
+        || strtolower((string) ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '')) === 'https';
+    $secureEnv = getenv('SESSION_SECURE_COOKIE');
+    $secure = $secureEnv === false
+        ? $https
+        : filter_var($secureEnv, FILTER_VALIDATE_BOOLEAN);
+
     session_set_cookie_params([
-        'httponly' => true, 'secure' => $secure, 'samesite' => 'Lax',
+        'httponly' => true,
+        'secure' => $secure,
+        'samesite' => 'Lax',
         'path' => '/',
     ]);
     session_start();
 }
 
-\App\Database::connection();
-\App\Database::migrate();
-\App\Database::seed();
+\\App\\Database::connection();
+\\App\\Database::migrate();
+\\App\\Database::seed();
 
 require APP_PATH . '/helpers.php';
