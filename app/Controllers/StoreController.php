@@ -1,0 +1,12 @@
+<?php
+declare(strict_types=1);
+namespace App\Controllers;
+use App\Database;
+use App\Repositories\ProductRepository;
+
+final class StoreController {
+    public function home(): void { $repo=new ProductRepository(); render('store/home',['title'=>'Discover something good','featured'=>$repo->featured(8),'categories'=>$repo->categories()]); }
+    public function products(): void { $filters=['q'=>trim((string)($_GET['q']??'')),'category'=>trim((string)($_GET['category']??'')),'min'=>$_GET['min']??'','max'=>$_GET['max']??'','sort'=>$_GET['sort']??'featured']; $repo=new ProductRepository(); render('store/products',['title'=>'Shop all products','products'=>$repo->listing($filters),'categories'=>$repo->categories(),'filters'=>$filters]); }
+    public function product(): void { $id=(int)($_GET['id']??0); $slug=trim((string)($_GET['slug']??'')); $repo=new ProductRepository(); $product=$slug ? $repo->bySlug($slug) : $repo->find($id); if (!$product) { http_response_code(404); render('errors/404',['title'=>'Product not found']); return; } $s=Database::connection()->prepare('SELECT r.*,u.name reviewer FROM reviews r JOIN users u ON u.id=r.user_id WHERE r.product_id=? ORDER BY r.created_at DESC'); $s->execute([$product['id']]); render('store/product',['title'=>$product['name'],'product'=>$product,'reviews'=>$s->fetchAll(),'related'=>$repo->listing(['category'=>$product['category'],'sort'=>'rating'])]); }
+    public function review(): void { require_login(); verify_csrf(); $productId=(int)($_POST['product_id']??0); $rating=max(1,min(5,(int)($_POST['rating']??5))); $title=trim((string)($_POST['title']??'')); $body=trim((string)($_POST['body']??'')); if ($title==='' || $body==='') { flash('error','Please enter a review title and message.'); redirect('product?id='.$productId); } $db=Database::connection(); $s=$db->prepare('INSERT INTO reviews (user_id,product_id,rating,title,body) VALUES (?,?,?,?,?) ON CONFLICT(user_id,product_id) DO UPDATE SET rating=excluded.rating,title=excluded.title,body=excluded.body,created_at=CURRENT_TIMESTAMP'); $s->execute([current_user()['id'],$productId,$rating,mb_substr($title,0,120),mb_substr($body,0,3000)]); $db->prepare('UPDATE products SET rating=(SELECT ROUND(AVG(rating),1) FROM reviews WHERE product_id=?), review_count=(SELECT COUNT(*) FROM reviews WHERE product_id=?) WHERE id=?')->execute([$productId,$productId,$productId]); flash('success','Thanks! Your review has been saved.'); redirect('product?id='.$productId); }
+}
