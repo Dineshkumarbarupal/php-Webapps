@@ -4,7 +4,10 @@ declare(strict_types=1);
 // Local PHP built-in-server router. Apache hosting uses .htaccess instead.
 $path = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
 
-if (preg_match('#^/(?:app|storage)(?:/|$)#i', $path) || $path === '/server.php') {
+if (
+    preg_match('#^/(?:app|storage|\.git)(?:/|$)#i', $path)
+    || preg_match('#^/(?:\.env(?:\..*)?|\.gitignore|README\.md|server\.php)$#i', $path)
+) {
     http_response_code(404);
     exit('Not found');
 }
