@@ -30,8 +30,8 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
-\\App\\Database::connection();
-\\App\\Database::migrate();
-\\App\\Database::seed();
+\App\Database::connection();
+\App\Database::migrate();
+\App\Database::seed();
 
 require APP_PATH . '/helpers.php';
