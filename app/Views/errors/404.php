@@ -1,0 +1,1 @@
+<section class="container page-section"><div class="empty-state"><div class="empty-icon">↗</div><h1>We couldn’t find that page.</h1><p>It may have moved, or the link may be out of date.</p><a class="btn btn-primary" href="/">Back to home</a></div></section>
