@@ -1,0 +1,1 @@
+<section class="container page-section"><div class="empty-state"><div class="empty-icon">↻</div><h1>Your session expired.</h1><p>Please go back, refresh the page, and try again.</p><a class="btn btn-primary" href="/">Back to home</a></div></section>
