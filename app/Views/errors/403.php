@@ -1,0 +1,1 @@
+<section class="container page-section"><div class="empty-state"><div class="empty-icon">⌁</div><h1>Access denied</h1><p>This page is for store administrators only.</p><a class="btn btn-primary" href="/">Back to home</a></div></section>
